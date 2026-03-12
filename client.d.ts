@@ -77,6 +77,29 @@ export declare namespace cloud {
     size: bigint
   }
 }
+export declare namespace friends {
+  /**
+   * Returns the display name for a given Steam user.
+   *
+   * If the name is not cached locally, this returns an empty string or
+   * "[unknown]".  Call `request_user_information` first and wait for the
+   * `PersonaStateChange` callback before retrying.
+   *
+   * {@link https://partner.steamgames.com/doc/api/ISteamFriends#GetFriendPersonaName}
+   */
+  export function getPersonaName(steamId64: bigint): string
+  /**
+   * Requests persona data (display name, avatar) from Steam servers for a
+   * user that is not in the local cache.
+   *
+   * Returns `true` if information needs to be fetched from the server
+   * (a `PersonaStateChange` callback will fire when ready).
+   * Returns `false` if the information is already available locally.
+   *
+   * {@link https://partner.steamgames.com/doc/api/ISteamFriends#RequestUserInformation}
+   */
+  export function requestUserInformation(steamId64: bigint, nameOnly: boolean): boolean
+}
 export declare namespace input {
   export const enum InputType {
     Unknown = 'Unknown',
