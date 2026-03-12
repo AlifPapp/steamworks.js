@@ -9,6 +9,16 @@ pub mod workshop {
     use crate::api::localplayer::PlayerSteamId;
     use crate::api::workshop::workshop::UgcItemVisibility;
 
+    fn descriptor_to_u32(desc: steamworks::UGCContentDescriptorID) -> u32 {
+        match desc {
+            steamworks::UGCContentDescriptorID::NudityOrSexualContent => 1,
+            steamworks::UGCContentDescriptorID::FrequentViolenceOrGore => 2,
+            steamworks::UGCContentDescriptorID::AdultOnlySexualContent => 3,
+            steamworks::UGCContentDescriptorID::GratuitousSexualContent => 4,
+            steamworks::UGCContentDescriptorID::AnyMatureContent => 5,
+        }
+    }
+
     #[napi]
     pub enum UGCQueryType {
         RankedByVote,
@@ -280,7 +290,8 @@ pub mod workshop {
         pub num_downvotes: u32,
         pub num_children: u32,
         pub preview_url: Option<String>,
-        pub statistics: WorkshopItemStatistic, // Is it necessary to design this as optional?
+        pub statistics: WorkshopItemStatistic,
+        pub content_descriptors: Vec<u32>,
     }
 
     impl WorkshopItem {
@@ -306,6 +317,7 @@ pub mod workshop {
                 num_children: item.num_children,
                 preview_url: results.preview_url(index),
                 statistics: WorkshopItemStatistic::from_query_results(results, index),
+                content_descriptors: results.content_descriptor(index).into_iter().map(descriptor_to_u32).collect(),
             })
         }
     }

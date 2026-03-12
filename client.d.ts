@@ -320,6 +320,7 @@ export declare namespace workshop {
     contentPath?: string
     tags?: Array<string>
     visibility?: UgcItemVisibility
+    contentDescriptors?: Array<number>
   }
   export interface InstallInfo {
     folder: string
@@ -524,6 +525,7 @@ export declare namespace workshop {
     numChildren: number
     previewUrl?: string
     statistics: WorkshopItemStatistic
+    contentDescriptors: Array<number>
   }
   export interface WorkshopPaginatedResult {
     items: Array<WorkshopItem | undefined | null>

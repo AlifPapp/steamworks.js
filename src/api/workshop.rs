@@ -7,7 +7,7 @@ pub mod workshop {
     use napi::threadsafe_function::ThreadsafeFunction;
     use napi::threadsafe_function::ThreadsafeFunctionCallMode;
     use std::path::Path;
-    use steamworks::{FileType, PublishedFileId, UpdateHandle};
+    use steamworks::{FileType, PublishedFileId, UGCContentDescriptorID, UpdateHandle};
     use tokio::sync::oneshot;
 
     #[napi(object)]
@@ -56,6 +56,7 @@ pub mod workshop {
         pub content_path: Option<String>,
         pub tags: Option<Vec<String>>,
         pub visibility: Option<UgcItemVisibility>,
+        pub content_descriptors: Option<Vec<u32>>,
     }
 
     impl UgcUpdate {
@@ -88,6 +89,19 @@ pub mod workshop {
 
             if let Some(visibility) = self.visibility {
                 update = update.visibility(visibility.into());
+            }
+
+            if let Some(descriptors) = self.content_descriptors {
+                for d in 1..=5u32 {
+                    if let Some(desc) = u32_to_descriptor(d) {
+                        update = update.remove_content_descriptor(desc);
+                    }
+                }
+                for d in descriptors {
+                    if let Some(desc) = u32_to_descriptor(d) {
+                        update = update.add_content_descriptor(desc);
+                    }
+                }
             }
 
             let change_note = self.change_note.as_deref();
@@ -496,6 +510,17 @@ pub mod workshop {
         match result {
             Ok(()) => Ok(()),
             Err(e) => Err(Error::from_reason(e.to_string())),
+        }
+    }
+
+    fn u32_to_descriptor(val: u32) -> Option<UGCContentDescriptorID> {
+        match val {
+            1 => Some(UGCContentDescriptorID::NudityOrSexualContent),
+            2 => Some(UGCContentDescriptorID::FrequentViolenceOrGore),
+            3 => Some(UGCContentDescriptorID::AdultOnlySexualContent),
+            4 => Some(UGCContentDescriptorID::GratuitousSexualContent),
+            5 => Some(UGCContentDescriptorID::AnyMatureContent),
+            _ => None,
         }
     }
 
