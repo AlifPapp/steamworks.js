@@ -375,6 +375,35 @@ export declare namespace workshop {
    * @returns an array of subscribed workshop item ids
    */
   export function getSubscribedItems(includeLocallyDisabled: boolean): Array<bigint>
+  /**
+   * Sets the user's vote on a workshop item (thumbs up or thumbs down).
+   *
+   * {@link https://partner.steamgames.com/doc/api/ISteamUGC#SetUserItemVote}
+   */
+  export function setUserItemVote(itemId: bigint, voteUp: boolean): Promise<void>
+  /**
+   * Gets the user's current vote status on a workshop item.
+   *
+   * {@link https://partner.steamgames.com/doc/api/ISteamUGC#GetUserItemVote}
+   */
+  export interface UserItemVoteResult {
+    votedUp: boolean
+    votedDown: boolean
+    voteSkipped: boolean
+  }
+  export function getUserItemVote(itemId: bigint): Promise<UserItemVoteResult>
+  /**
+   * Adds a workshop item to the user's favorites list.
+   *
+   * {@link https://partner.steamgames.com/doc/api/ISteamUGC#AddItemToFavorites}
+   */
+  export function addItemToFavorites(appId: number, itemId: bigint): Promise<void>
+  /**
+   * Removes a workshop item from the user's favorites list.
+   *
+   * {@link https://partner.steamgames.com/doc/api/ISteamUGC#RemoveItemFromFavorites}
+   */
+  export function removeItemFromFavorites(appId: number, itemId: bigint): Promise<void>
   export function deleteItem(itemId: bigint): Promise<void>
   export const enum UGCQueryType {
     RankedByVote = 0,

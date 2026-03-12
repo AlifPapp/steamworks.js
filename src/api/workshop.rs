@@ -404,6 +404,101 @@ pub mod workshop {
             .collect::<Vec<_>>()
     }
 
+    /// Sets the user's vote on a workshop item (thumbs up or thumbs down).
+    ///
+    /// {@link https://partner.steamgames.com/doc/api/ISteamUGC#SetUserItemVote}
+    #[napi]
+    pub async fn set_user_item_vote(item_id: BigInt, vote_up: bool) -> Result<(), Error> {
+        let client = crate::client::get_client();
+        let (tx, rx) = oneshot::channel();
+
+        client
+            .ugc()
+            .set_user_item_vote(PublishedFileId(item_id.get_u64().1), vote_up, |result| {
+                tx.send(result).unwrap();
+            });
+
+        let result = rx.await.unwrap();
+        match result {
+            Ok(()) => Ok(()),
+            Err(e) => Err(Error::from_reason(e.to_string())),
+        }
+    }
+
+    /// Gets the user's current vote status on a workshop item.
+    ///
+    /// {@link https://partner.steamgames.com/doc/api/ISteamUGC#GetUserItemVote}
+    #[napi(object)]
+    pub struct UserItemVoteResult {
+        pub voted_up: bool,
+        pub voted_down: bool,
+        pub vote_skipped: bool,
+    }
+
+    #[napi]
+    pub async fn get_user_item_vote(item_id: BigInt) -> Result<UserItemVoteResult, Error> {
+        let client = crate::client::get_client();
+        let (tx, rx) = oneshot::channel();
+
+        client
+            .ugc()
+            .get_user_item_vote(PublishedFileId(item_id.get_u64().1), |result| {
+                tx.send(result).unwrap();
+            });
+
+        let result = rx.await.unwrap();
+        match result {
+            Ok((voted_up, voted_down, vote_skipped)) => Ok(UserItemVoteResult {
+                voted_up,
+                voted_down,
+                vote_skipped,
+            }),
+            Err(e) => Err(Error::from_reason(e.to_string())),
+        }
+    }
+
+    /// Adds a workshop item to the user's favorites list.
+    ///
+    /// {@link https://partner.steamgames.com/doc/api/ISteamUGC#AddItemToFavorites}
+    #[napi]
+    pub async fn add_item_to_favorites(app_id: u32, item_id: BigInt) -> Result<(), Error> {
+        let client = crate::client::get_client();
+        let (tx, rx) = oneshot::channel();
+
+        client
+            .ugc()
+            .add_item_to_favorites(steamworks::AppId(app_id), PublishedFileId(item_id.get_u64().1), |result| {
+                tx.send(result).unwrap();
+            });
+
+        let result = rx.await.unwrap();
+        match result {
+            Ok(()) => Ok(()),
+            Err(e) => Err(Error::from_reason(e.to_string())),
+        }
+    }
+
+    /// Removes a workshop item from the user's favorites list.
+    ///
+    /// {@link https://partner.steamgames.com/doc/api/ISteamUGC#RemoveItemFromFavorites}
+    #[napi]
+    pub async fn remove_item_from_favorites(app_id: u32, item_id: BigInt) -> Result<(), Error> {
+        let client = crate::client::get_client();
+        let (tx, rx) = oneshot::channel();
+
+        client
+            .ugc()
+            .remove_item_from_favorites(steamworks::AppId(app_id), PublishedFileId(item_id.get_u64().1), |result| {
+                tx.send(result).unwrap();
+            });
+
+        let result = rx.await.unwrap();
+        match result {
+            Ok(()) => Ok(()),
+            Err(e) => Err(Error::from_reason(e.to_string())),
+        }
+    }
+
     // Deletes an item
     // @returns true or false
     #[napi]
