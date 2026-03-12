@@ -290,6 +290,7 @@ pub mod workshop {
         pub num_downvotes: u32,
         pub num_children: u32,
         pub preview_url: Option<String>,
+        pub file_size: u32,
         pub statistics: WorkshopItemStatistic,
         pub content_descriptors: Vec<u32>,
     }
@@ -315,6 +316,7 @@ pub mod workshop {
                 num_upvotes: item.num_upvotes,
                 num_downvotes: item.num_downvotes,
                 num_children: item.num_children,
+                file_size: item.file_size,
                 preview_url: results.preview_url(index),
                 statistics: WorkshopItemStatistic::from_query_results(results, index),
                 content_descriptors: results.content_descriptor(index).into_iter().map(descriptor_to_u32).collect(),

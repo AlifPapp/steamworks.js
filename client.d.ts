@@ -524,6 +524,7 @@ export declare namespace workshop {
     numDownvotes: number
     numChildren: number
     previewUrl?: string
+    fileSize: number
     statistics: WorkshopItemStatistic
     contentDescriptors: Array<number>
   }
