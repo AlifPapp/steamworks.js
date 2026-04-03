@@ -38,4 +38,9 @@ pub fn run_callbacks() {
     client::get_client().run_callbacks();
 }
 
+#[napi]
+pub fn shutdown() {
+    client::drop_client();
+}
+
 pub mod api;
