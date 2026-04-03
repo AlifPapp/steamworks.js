@@ -73,5 +73,10 @@ module.exports.electronEnableSteamOverlay = (disableEachFrameInvalidation) => {
     }
 }
 
+module.exports.shutdown = () => {
+    clearInterval(runCallbacksInterval)
+    runCallbacksInterval = undefined
+}
+
 const SteamCallback = nativeBinding.callback.SteamCallback
 module.exports.SteamCallback = SteamCallback
