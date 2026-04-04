@@ -523,6 +523,8 @@ export declare namespace workshop {
     url: string
     numUpvotes: number
     numDownvotes: number
+    /** The bayesian average for up votes / total votes, between [0,1]. */
+    score: number
     numChildren: number
     previewUrl?: string
     fileSize: number

@@ -288,6 +288,8 @@ pub mod workshop {
         pub url: String,
         pub num_upvotes: u32,
         pub num_downvotes: u32,
+        /// The bayesian average for up votes / total votes, between [0,1].
+        pub score: f64,
         pub num_children: u32,
         pub preview_url: Option<String>,
         pub file_size: u32,
@@ -315,6 +317,7 @@ pub mod workshop {
                 url: item.url,
                 num_upvotes: item.num_upvotes,
                 num_downvotes: item.num_downvotes,
+                score: item.score as f64,
                 num_children: item.num_children,
                 file_size: item.file_size,
                 preview_url: results.preview_url(index),
