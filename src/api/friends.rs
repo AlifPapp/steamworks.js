@@ -32,6 +32,8 @@ pub mod friends {
     pub fn request_user_information(steam_id64: BigInt, name_only: bool) -> bool {
         let client = crate::client::get_client();
         let steam_id = SteamId::from_raw(steam_id64.get_u64().1);
-        client.friends().request_user_information(steam_id, name_only)
+        client
+            .friends()
+            .request_user_information(steam_id, name_only)
     }
 }

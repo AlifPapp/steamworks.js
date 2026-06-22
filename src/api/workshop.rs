@@ -170,7 +170,9 @@ pub mod workshop {
                 let _ = tx.send(result);
             });
 
-        let result = rx.await.map_err(|_| Error::from_reason("steam callback channel closed"))?;
+        let result = rx
+            .await
+            .map_err(|_| Error::from_reason("steam callback channel closed"))?;
         match result {
             Ok((item_id, needs_to_accept_agreement)) => Ok(UgcResult {
                 item_id: BigInt::from(item_id.0),
@@ -204,7 +206,9 @@ pub mod workshop {
             });
         };
 
-        let result = rx.await.map_err(|_| Error::from_reason("steam callback channel closed"))?;
+        let result = rx
+            .await
+            .map_err(|_| Error::from_reason("steam callback channel closed"))?;
         match result {
             Ok((item_id, needs_to_accept_agreement)) => Ok(UgcResult {
                 item_id: BigInt::from(item_id.0),
@@ -306,7 +310,9 @@ pub mod workshop {
                 let _ = tx.send(result);
             });
 
-        let result = rx.await.map_err(|_| Error::from_reason("steam callback channel closed"))?;
+        let result = rx
+            .await
+            .map_err(|_| Error::from_reason("steam callback channel closed"))?;
         match result {
             Ok(()) => Ok(()),
             Err(e) => Err(Error::from_reason(e.to_string())),
@@ -327,7 +333,9 @@ pub mod workshop {
                 let _ = tx.send(result);
             });
 
-        let result = rx.await.map_err(|_| Error::from_reason("steam callback channel closed"))?;
+        let result = rx
+            .await
+            .map_err(|_| Error::from_reason("steam callback channel closed"))?;
         match result {
             Ok(()) => Ok(()),
             Err(e) => Err(Error::from_reason(e.to_string())),
@@ -432,7 +440,9 @@ pub mod workshop {
                 let _ = tx.send(result);
             });
 
-        let result = rx.await.map_err(|_| Error::from_reason("steam callback channel closed"))?;
+        let result = rx
+            .await
+            .map_err(|_| Error::from_reason("steam callback channel closed"))?;
         match result {
             Ok(()) => Ok(()),
             Err(e) => Err(Error::from_reason(e.to_string())),
@@ -460,7 +470,9 @@ pub mod workshop {
                 let _ = tx.send(result);
             });
 
-        let result = rx.await.map_err(|_| Error::from_reason("steam callback channel closed"))?;
+        let result = rx
+            .await
+            .map_err(|_| Error::from_reason("steam callback channel closed"))?;
         match result {
             Ok((voted_up, voted_down, vote_skipped)) => Ok(UserItemVoteResult {
                 voted_up,
@@ -479,13 +491,17 @@ pub mod workshop {
         let client = crate::client::get_client();
         let (tx, rx) = oneshot::channel();
 
-        client
-            .ugc()
-            .add_item_to_favorites(steamworks::AppId(app_id), PublishedFileId(item_id.get_u64().1), |result| {
+        client.ugc().add_item_to_favorites(
+            steamworks::AppId(app_id),
+            PublishedFileId(item_id.get_u64().1),
+            |result| {
                 let _ = tx.send(result);
-            });
+            },
+        );
 
-        let result = rx.await.map_err(|_| Error::from_reason("steam callback channel closed"))?;
+        let result = rx
+            .await
+            .map_err(|_| Error::from_reason("steam callback channel closed"))?;
         match result {
             Ok(()) => Ok(()),
             Err(e) => Err(Error::from_reason(e.to_string())),
@@ -500,13 +516,17 @@ pub mod workshop {
         let client = crate::client::get_client();
         let (tx, rx) = oneshot::channel();
 
-        client
-            .ugc()
-            .remove_item_from_favorites(steamworks::AppId(app_id), PublishedFileId(item_id.get_u64().1), |result| {
+        client.ugc().remove_item_from_favorites(
+            steamworks::AppId(app_id),
+            PublishedFileId(item_id.get_u64().1),
+            |result| {
                 let _ = tx.send(result);
-            });
+            },
+        );
 
-        let result = rx.await.map_err(|_| Error::from_reason("steam callback channel closed"))?;
+        let result = rx
+            .await
+            .map_err(|_| Error::from_reason("steam callback channel closed"))?;
         match result {
             Ok(()) => Ok(()),
             Err(e) => Err(Error::from_reason(e.to_string())),
@@ -530,14 +550,16 @@ pub mod workshop {
     pub async fn delete_item(item_id: BigInt) -> Result<(), Error> {
         let client = crate::client::get_client();
         let (tx, rx) = oneshot::channel();
-    
+
         client
             .ugc()
             .delete_item(PublishedFileId(item_id.get_u64().1), |result| {
                 let _ = tx.send(result);
             });
-    
-        let result = rx.await.map_err(|_| Error::from_reason("steam callback channel closed"))?;
+
+        let result = rx
+            .await
+            .map_err(|_| Error::from_reason("steam callback channel closed"))?;
         match result {
             Ok(()) => Ok(()),
             Err(e) => Err(Error::from_reason(e.to_string())),

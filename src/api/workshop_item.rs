@@ -322,7 +322,11 @@ pub mod workshop {
                 file_size: item.file_size,
                 preview_url: results.preview_url(index),
                 statistics: WorkshopItemStatistic::from_query_results(results, index),
-                content_descriptors: results.content_descriptor(index).into_iter().map(descriptor_to_u32).collect(),
+                content_descriptors: results
+                    .content_descriptor(index)
+                    .into_iter()
+                    .map(descriptor_to_u32)
+                    .collect(),
             })
         }
     }

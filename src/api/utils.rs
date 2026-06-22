@@ -19,6 +19,12 @@ pub mod utils {
         client.utils().get_server_real_time()
     }
 
+    #[napi(js_name = "getSteamUILanguage")]
+    pub fn get_steam_ui_language() -> String {
+        let client = crate::client::get_client();
+        client.utils().ui_language()
+    }
+
     #[napi]
     pub fn is_steam_running_on_steam_deck() -> bool {
         let client = crate::client::get_client();

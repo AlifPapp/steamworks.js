@@ -62,7 +62,7 @@ pub mod networking {
                 SendType::ReliableWithBuffering => steamworks::SendType::ReliableWithBuffering,
             },
             &data,
-            channel
+            channel,
         );
         Ok(result)
     }
