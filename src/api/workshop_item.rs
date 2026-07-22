@@ -395,47 +395,85 @@ pub mod workshop {
         pub consumer: Option<u32>,
     }
 
+    /// Steam query APIs differ by handle kind; map one JS config correctly per kind.
+    #[derive(Clone, Copy)]
+    enum WorkshopQueryKind {
+        All,
+        User,
+        Details,
+    }
+
     fn handle_query_config(
         mut query_handle: steamworks::QueryHandle,
         query_config: Option<WorkshopItemQueryConfig>,
+        kind: WorkshopQueryKind,
     ) -> steamworks::QueryHandle {
-        // Apply statistics query parameters if provided
-        if let Some(query_config) = query_config {
-            if let Some(cached_response_max_age) = query_config.cached_response_max_age {
-                query_handle = query_handle.set_allow_cached_response(cached_response_max_age);
-            }
-            if let Some(include_metadata) = query_config.include_metadata {
-                query_handle = query_handle.set_return_metadata(include_metadata);
-            }
-            if let Some(include_long_description) = query_config.include_long_description {
-                query_handle = query_handle.set_return_long_description(include_long_description);
-            }
-            if let Some(include_additional_previews) = query_config.include_additional_previews {
-                query_handle =
-                    query_handle.set_return_additional_previews(include_additional_previews)
-            }
-            if let Some(only_ids) = query_config.only_ids {
-                query_handle = query_handle.set_return_only_ids(only_ids)
-            }
-            if let Some(only_total) = query_config.only_total {
-                query_handle = query_handle.set_return_total_only(only_total)
-            }
-            if let Some(language) = query_config.language {
-                query_handle = query_handle.set_language(&language);
-            }
-            if let Some(match_any_tag) = query_config.match_any_tag {
-                query_handle = query_handle.set_match_any_tag(match_any_tag);
-            }
-            if let Some(required_tags) = query_config.required_tags {
-                for tag in required_tags {
-                    query_handle = query_handle.add_required_tag(&tag);
+        let Some(query_config) = query_config else {
+            return query_handle;
+        };
+
+        if let Some(cached_response_max_age) = query_config.cached_response_max_age {
+            query_handle = query_handle.set_allow_cached_response(cached_response_max_age);
+        }
+        if let Some(include_metadata) = query_config.include_metadata {
+            query_handle = query_handle.set_return_metadata(include_metadata);
+        }
+        if let Some(include_long_description) = query_config.include_long_description {
+            query_handle = query_handle.set_return_long_description(include_long_description);
+        }
+        if let Some(include_additional_previews) = query_config.include_additional_previews {
+            query_handle =
+                query_handle.set_return_additional_previews(include_additional_previews)
+        }
+        if let Some(only_ids) = query_config.only_ids {
+            query_handle = query_handle.set_return_only_ids(only_ids)
+        }
+        if let Some(only_total) = query_config.only_total {
+            query_handle = query_handle.set_return_total_only(only_total)
+        }
+        if let Some(language) = query_config.language {
+            query_handle = query_handle.set_language(&language);
+        }
+
+        // Details handles reject tags / QueryAll-only options.
+        if matches!(kind, WorkshopQueryKind::Details) {
+            return query_handle;
+        }
+
+        let match_any_tag = query_config.match_any_tag.unwrap_or(false);
+        if let Some(required_tags) = query_config.required_tags {
+            if !required_tags.is_empty() {
+                match kind {
+                    WorkshopQueryKind::All => {
+                        if match_any_tag {
+                            query_handle = query_handle.set_match_any_tag(true);
+                        }
+                        for tag in &required_tags {
+                            query_handle = query_handle.add_required_tag(tag);
+                        }
+                    }
+                    WorkshopQueryKind::User => {
+                        // SetMatchAnyTag is QueryAll-only; use AddRequiredTagGroup for OR.
+                        if match_any_tag {
+                            query_handle = query_handle.add_required_tag_group(&required_tags);
+                        } else {
+                            for tag in &required_tags {
+                                query_handle = query_handle.add_required_tag(tag);
+                            }
+                        }
+                    }
+                    WorkshopQueryKind::Details => {}
                 }
             }
-            if let Some(excluded_tags) = query_config.excluded_tags {
-                for tag in excluded_tags {
-                    query_handle = query_handle.add_excluded_tag(&tag);
-                }
+        }
+        if let Some(excluded_tags) = query_config.excluded_tags {
+            for tag in excluded_tags {
+                query_handle = query_handle.add_excluded_tag(&tag);
             }
+        }
+
+        // SetSearchText / SetRankedByTrendDays are QueryAll-only.
+        if matches!(kind, WorkshopQueryKind::All) {
             if let Some(search_text) = query_config.search_text {
                 query_handle = query_handle.set_search_text(&search_text);
             }
@@ -443,6 +481,7 @@ pub mod workshop {
                 query_handle = query_handle.set_ranked_by_trend_days(ranked_by_trend_days);
             }
         }
+
         query_handle
     }
 
@@ -460,7 +499,8 @@ pub mod workshop {
                 .query_item(PublishedFileId(item.get_u64().1))
                 .map_err(|e| Error::from_reason(e.to_string()))?;
 
-            query_handle = handle_query_config(query_handle, query_config);
+            query_handle =
+                handle_query_config(query_handle, query_config, WorkshopQueryKind::Details);
 
             query_handle.fetch(|fetch_result| {
                 tx.send(
@@ -495,7 +535,8 @@ pub mod workshop {
                 )
                 .map_err(|e| Error::from_reason(e.to_string()))?;
 
-            query_handle = handle_query_config(query_handle, query_config);
+            query_handle =
+                handle_query_config(query_handle, query_config, WorkshopQueryKind::Details);
 
             query_handle.fetch(|fetch_result| {
                 tx.send(
@@ -539,7 +580,7 @@ pub mod workshop {
                 )
                 .map_err(|e| Error::from_reason(e.to_string()))?;
 
-            query_handle = handle_query_config(query_handle, query_config);
+            query_handle = handle_query_config(query_handle, query_config, WorkshopQueryKind::All);
 
             query_handle.fetch(|fetch_result| {
                 tx.send(fetch_result.map(|query_results| {
@@ -584,7 +625,7 @@ pub mod workshop {
                 )
                 .map_err(|e| Error::from_reason(e.to_string()))?;
 
-            query_handle = handle_query_config(query_handle, query_config);
+            query_handle = handle_query_config(query_handle, query_config, WorkshopQueryKind::User);
 
             query_handle.fetch(|fetch_result| {
                 tx.send(fetch_result.map(|query_results| {
